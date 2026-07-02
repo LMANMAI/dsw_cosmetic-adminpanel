@@ -28,6 +28,8 @@ export interface PerfilProfesionalSignup {
   perfilVisible?: boolean;
   autoConfirmarTurnos?: boolean;
   anticipoPorcentaje?: 0 | 20 | 50 | 100;
+  /** Premio de competencia: fecha (YYYY-MM-DD) hasta la cual no paga comisión. */
+  comisionExentaHasta?: string;
 }
 
 export interface PerfilProveedor {

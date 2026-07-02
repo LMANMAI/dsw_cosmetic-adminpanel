@@ -40,6 +40,32 @@ export async function setHabilitado(
   }
 }
 
+/**
+ * Premio de competencia: exime al profesional de la comisión de la
+ * plataforma hasta la fecha indicada (hoy + dias). Con dias <= 0 se
+ * quita la exención. El app móvil debe respetar perfil.comisionExentaHasta
+ * al calcular comisionPlataforma.
+ */
+export async function setExencionComision(uid: string, dias: number): Promise<void> {
+  const ref = doc(db, COL, uid);
+  if (dias <= 0) {
+    await updateDoc(ref, { "perfil.comisionExentaHasta": null });
+    return;
+  }
+  const hasta = new Date();
+  hasta.setDate(hasta.getDate() + dias);
+  await updateDoc(ref, {
+    "perfil.comisionExentaHasta": hasta.toISOString().slice(0, 10),
+  });
+}
+
+export function exencionVigente(u: Usuario): string | null {
+  const hasta = (u.perfil as { comisionExentaHasta?: string } | undefined)
+    ?.comisionExentaHasta;
+  if (!hasta) return null;
+  return hasta >= new Date().toISOString().slice(0, 10) ? hasta : null;
+}
+
 export function estaHabilitado(u: Usuario & { bloqueado?: boolean }): boolean {
   const p = u.perfil as Record<string, unknown> | undefined;
   if (u.rol === "profesional") return (p?.perfilVisible as boolean) !== false;
