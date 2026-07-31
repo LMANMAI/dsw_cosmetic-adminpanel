@@ -1,0 +1,61 @@
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { db } from "../firebase";
+
+/** Comisión por defecto si el doc config/plataforma todavía no existe. */
+export const COMISION_DEFAULT = 20;
+
+const ref = () => doc(db, "config", "plataforma");
+
+/** Porcentaje global de comisión (0-100). */
+export async function getComisionGlobal(): Promise<number> {
+  const snap = await getDoc(ref());
+  const pct = snap.data()?.comisionPorcentaje;
+  return typeof pct === "number" ? pct : COMISION_DEFAULT;
+}
+
+export async function setComisionGlobal(pct: number): Promise<void> {
+  await setDoc(ref(), { comisionPorcentaje: pct }, { merge: true });
+}
+
+/* ── Mercado Pago ──────────────────────────────────────────────────
+ * Datos de la aplicación de MP de la plataforma. El client_secret NO
+ * se guarda acá: vive en Secret Manager (MP_CLIENT_SECRET) y solo lo
+ * leen las Cloud Functions.
+ */
+
+/** Valores por defecto si el doc todavía no tiene los campos. */
+export const MP_CLIENT_ID_DEFAULT = "7038717644366606";
+export const MP_COMISION_PEDIDOS_DEFAULT = 5;
+
+export interface MpConfig {
+  /** Client ID de la aplicación de Mercado Pago (no es secreto). */
+  mpClientId: string;
+  /** Comisión (%) de la plataforma sobre pedidos de insumos (marketplace_fee). */
+  mpComisionPedidosPorcentaje: number;
+}
+
+export async function getMpConfig(): Promise<MpConfig> {
+  const snap = await getDoc(ref());
+  const data = snap.data() ?? {};
+  return {
+    mpClientId:
+      typeof data.mpClientId === "string" && data.mpClientId
+        ? data.mpClientId
+        : MP_CLIENT_ID_DEFAULT,
+    mpComisionPedidosPorcentaje:
+      typeof data.mpComisionPedidosPorcentaje === "number"
+        ? data.mpComisionPedidosPorcentaje
+        : MP_COMISION_PEDIDOS_DEFAULT,
+  };
+}
+
+export async function setMpConfig(cfg: MpConfig): Promise<void> {
+  await setDoc(
+    ref(),
+    {
+      mpClientId: cfg.mpClientId.trim(),
+      mpComisionPedidosPorcentaje: cfg.mpComisionPedidosPorcentaje,
+    },
+    { merge: true },
+  );
+}

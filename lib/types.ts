@@ -30,6 +30,22 @@ export interface PerfilProfesionalSignup {
   anticipoPorcentaje?: 0 | 20 | 50 | 100;
   /** Premio de competencia: fecha (YYYY-MM-DD) hasta la cual no paga comisión. */
   comisionExentaHasta?: string;
+  /** Comisión personalizada (0-100). Si falta, se usa la global de config/plataforma. */
+  comisionPorcentaje?: number;
+  /** Datos de facturación: destino para recibir premios/transferencias. */
+  facturacion?: { tipo: "alias" | "cbu"; valor: string };
+}
+
+/** Premio/transferencia manual registrada desde el panel. */
+export interface Gratificacion {
+  id: string;
+  profesionalId: string;
+  profesionalNombre: string;
+  monto: number;
+  motivo: string;
+  estado: "pendiente" | "transferida";
+  creadoEn: string; // ISO
+  transferidaEn?: string | null; // ISO
 }
 
 export interface PerfilProveedor {
@@ -52,7 +68,11 @@ export interface Usuario {
   nombre: string;
   email: string;
   telefono: string;
+  /** VISTA activa de la cuenta. Un profesional mirando la app como cliente
+   *  tiene rol 'cliente' pero esProfesional true. */
   rol: UserRole;
+  /** Cuenta habilitada como profesional. Nunca vuelve a false. */
+  esProfesional?: boolean;
   avatarUrl?: string;
   perfil?: PerfilCliente | PerfilProfesionalSignup | PerfilProveedor;
   mpConectado?: boolean;
@@ -110,6 +130,12 @@ export interface Turno {
   senaPagada?: boolean;
   metodoPago?: MetodoPago;
   comisionPlataforma?: number;
+  /** Snapshot del % de comisión aplicado al completar (0-100). */
+  comisionPorcentaje?: number;
+  /** true si no se cobró comisión por una exención vigente (premio). */
+  comisionExento?: boolean;
+  /** Regla que determinó la comisión: 'global' | 'personalizada' | 'exencion'. */
+  comisionOrigen?: "global" | "personalizada" | "exencion";
 }
 
 export type EstadoPedido =
@@ -171,6 +197,31 @@ export interface Competencia {
   estado: EstadoCompetencia;
   ganadores?: GanadorCompetencia[];
   creadoEn: string;
+}
+
+/* ─── Catálogo global (colecciones `categorias` y `catalogo_servicios`) ─── */
+
+/**
+ * Slug de categoría. En la app móvil existe un union con las 13 categorías
+ * base; acá es string porque el panel puede crear categorías nuevas.
+ */
+export type CategoriaSlug = string;
+
+export interface Categoria {
+  slug: CategoriaSlug;
+  nombre: string;
+  emoji: string;
+}
+
+export type GeneroServicio = "femenino" | "masculino" | "unisex";
+
+export interface ServicioCatalogo {
+  id: string;
+  nombre: string;
+  categoria: CategoriaSlug;
+  /** Duración sugerida; cada profesional puede ajustarla en su perfil. */
+  duracionEstimadaMin: number;
+  genero?: GeneroServicio;
 }
 
 export type EstadoComision = "pendiente" | "pagada" | "vencida";

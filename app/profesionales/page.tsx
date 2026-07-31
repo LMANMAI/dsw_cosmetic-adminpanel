@@ -1,18 +1,35 @@
 "use client";
 
+import { useState } from "react";
 import { PageHeader } from "@/components/PageHeader";
 import { UsuariosTable } from "@/components/UsuariosTable";
-import { exencionVigente } from "@/lib/services/usuarios";
+import { GratificarModal } from "@/components/GratificarModal";
+import { NormalizarModal } from "@/components/NormalizarModal";
+import type { Usuario } from "@/lib/types";
 
 export default function ProfesionalesPage() {
+  const [gratificando, setGratificando] = useState<Usuario | null>(null);
+  const [normalizando, setNormalizando] = useState(false);
+  const [reloadToken, setReloadToken] = useState(0);
+
   return (
     <>
       <PageHeader
         title="Profesionales"
-        description="Cuentas con rol = profesional. Inhabilitar oculta el perfil de las búsquedas de clientes."
+        description="Cuentas habilitadas como profesionales (por rol o por el flag esProfesional). Inhabilitar oculta el perfil de las búsquedas de clientes. Las tarifas de servicio se gestionan en la sección Tarifas de servicio."
+        actions={
+          <button
+            onClick={() => setNormalizando(true)}
+            className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            title="Busca cuentas profesionales sin el flag esProfesional y las repara"
+          >
+            Normalizar cuentas
+          </button>
+        }
       />
       <UsuariosTable
         rol="profesional"
+        reloadToken={reloadToken}
         extraColumns={[
           {
             key: "especialidad",
@@ -29,22 +46,27 @@ export default function ProfesionalesPage() {
             label: "Modalidad",
             render: (u) => (u.perfil as any)?.modalidad ?? "—",
           },
-          {
-            key: "comision",
-            label: "Comisión",
-            render: (u) => {
-              const hasta = exencionVigente(u);
-              return hasta ? (
-                <span className="inline-flex rounded-full bg-amber-50 px-2 py-0.5 text-xs text-amber-700">
-                  Exento hasta {hasta}
-                </span>
-              ) : (
-                "Normal"
-              );
-            },
-          },
+        ]}
+        extraActions={[
+          { label: "Gratificar", onClick: (u) => setGratificando(u) },
         ]}
       />
+
+      {gratificando && (
+        <GratificarModal
+          usuario={gratificando}
+          onClose={() => setGratificando(null)}
+        />
+      )}
+
+      {normalizando && (
+        <NormalizarModal
+          onClose={(huboCambios) => {
+            setNormalizando(false);
+            if (huboCambios) setReloadToken((n) => n + 1);
+          }}
+        />
+      )}
     </>
   );
 }

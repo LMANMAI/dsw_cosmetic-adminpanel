@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link, { useLinkStatus } from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import {
@@ -10,8 +10,31 @@ import {
   Package,
   Map,
   Trophy,
+  Percent,
+  Tags,
   LogOut,
+  Loader2,
 } from "lucide-react";
+
+/**
+ * Indicador de navegación: useLinkStatus (dentro de un <Link>) expone
+ * `pending` desde el instante del click hasta que la ruta destino termina
+ * de cargar. Muestra un spinner en el ítem y un overlay a pantalla
+ * completa para que la carga sea inconfundible.
+ */
+function NavPendingSpinner() {
+  const { pending } = useLinkStatus();
+  if (!pending) return null;
+  return (
+    <>
+      <Loader2 size={14} className="ml-auto animate-spin text-brand-600" />
+      <span className="pointer-events-none fixed inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-white/70 backdrop-blur-sm">
+        <Loader2 size={36} className="animate-spin text-brand-600" />
+        <span className="text-sm font-medium text-slate-600">Cargando…</span>
+      </span>
+    </>
+  );
+}
 
 const items = [
   { href: "/", label: "Resumen", icon: LayoutDashboard },
@@ -20,6 +43,8 @@ const items = [
   { href: "/profesionales", label: "Profesionales", icon: Scissors },
   { href: "/proveedores", label: "Proveedores", icon: Package },
   { href: "/clientes", label: "Clientes", icon: Users },
+  { href: "/comisiones", label: "Tarifas de servicio", icon: Percent },
+  { href: "/catalogo", label: "Catálogo", icon: Tags },
 ];
 
 export function Sidebar() {
@@ -29,7 +54,7 @@ export function Sidebar() {
   return (
     <aside className="flex h-screen w-60 flex-col border-r border-slate-200 bg-white">
       <div className="border-b border-slate-200 px-4 py-4">
-        <div className="text-lg font-semibold">Beautyapp</div>
+        <div className="text-lg font-semibold">YOFI</div>
         <div className="text-xs text-slate-500">Panel admin</div>
       </div>
 
@@ -50,6 +75,7 @@ export function Sidebar() {
             >
               <Icon size={16} />
               {it.label}
+              <NavPendingSpinner />
             </Link>
           );
         })}

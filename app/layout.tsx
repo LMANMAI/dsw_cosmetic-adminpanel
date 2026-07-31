@@ -6,8 +6,8 @@ import { AuthGate } from "@/components/AuthGate";
 import { Sidebar } from "@/components/Sidebar";
 
 export const metadata: Metadata = {
-  title: "Beautyapp Admin",
-  description: "Panel administrativo de Beautyapp",
+  title: "YOFI Admin",
+  description: "Panel administrativo de YOFI",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

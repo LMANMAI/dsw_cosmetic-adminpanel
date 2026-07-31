@@ -38,7 +38,7 @@ export function LoginForm() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4">
       <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-        <h1 className="mb-1 text-xl font-semibold">Beautyapp Admin</h1>
+        <h1 className="mb-1 text-xl font-semibold">YOFI Admin</h1>
         <p className="mb-4 text-sm text-slate-500">
           Solo emails autorizados pueden entrar.
         </p>
