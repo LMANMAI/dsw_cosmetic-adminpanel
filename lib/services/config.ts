@@ -17,6 +17,24 @@ export async function setComisionGlobal(pct: number): Promise<void> {
   await setDoc(ref(), { comisionPorcentaje: pct }, { merge: true });
 }
 
+/* ── Tarifa de uso de la app (la paga el CLIENTE) ──────────────────────
+ * Se SUMA al precio del servicio al reservar y se cobra en el mismo
+ * checkout que la seña. Arranca en 0: no se cobra nada hasta configurarla.
+ */
+
+export const TARIFA_CLIENTE_DEFAULT = 0;
+
+/** Porcentaje global que paga el cliente sobre el valor del servicio (0-100). */
+export async function getTarifaClienteGlobal(): Promise<number> {
+  const snap = await getDoc(ref());
+  const pct = snap.data()?.tarifaClientePorcentaje;
+  return typeof pct === "number" ? pct : TARIFA_CLIENTE_DEFAULT;
+}
+
+export async function setTarifaClienteGlobal(pct: number): Promise<void> {
+  await setDoc(ref(), { tarifaClientePorcentaje: pct }, { merge: true });
+}
+
 /* ── Mercado Pago ──────────────────────────────────────────────────
  * Datos de la aplicación de MP de la plataforma. El client_secret NO
  * se guarda acá: vive en Secret Manager (MP_CLIENT_SECRET) y solo lo

@@ -4,7 +4,13 @@ import { useState } from "react";
 import { exencionVigente, comisionPersonalizada } from "@/lib/services/usuarios";
 import type { Usuario } from "@/lib/types";
 
-/** Modal de comisión: porcentaje personalizado + exención por premio. */
+/**
+ * Modal de comisión: porcentaje personalizado + exención por premio.
+ *
+ * Sirve para las dos tarifas: la del profesional (por defecto, lee
+ * perfil.comisionPorcentaje) y la de uso de la app que paga el cliente, en
+ * cuyo caso la página pasa `pctActual`, `exencionHasta` y los textos.
+ */
 export function ComisionModal({
   usuario,
   global,
@@ -12,6 +18,10 @@ export function ComisionModal({
   onGuardarPorcentaje,
   onExencion,
   onClose,
+  titulo = "Tarifa de servicio",
+  labelExencion = "Premio de competencia: días sin tarifa de servicio",
+  pctActual,
+  exencionHasta,
 }: {
   usuario: Usuario;
   global: number;
@@ -19,9 +29,13 @@ export function ComisionModal({
   onGuardarPorcentaje: (pct: number | null) => void;
   onExencion: (dias: number) => void;
   onClose: () => void;
+  titulo?: string;
+  labelExencion?: string;
+  pctActual?: number | null;
+  exencionHasta?: string | null;
 }) {
-  const vigente = exencionVigente(usuario);
-  const actual = comisionPersonalizada(usuario);
+  const vigente = exencionHasta !== undefined ? exencionHasta : exencionVigente(usuario);
+  const actual = pctActual !== undefined ? pctActual : comisionPersonalizada(usuario);
   const [pct, setPct] = useState<string>(actual !== null ? String(actual) : "");
   const [dias, setDias] = useState(30);
 
@@ -39,7 +53,7 @@ export function ComisionModal({
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-lg font-semibold">
-          Tarifa de servicio — {usuario.nombre || usuario.email}
+          {titulo} — {usuario.nombre || usuario.email}
         </h2>
 
         <div className="mt-4">
@@ -73,9 +87,7 @@ export function ComisionModal({
         <div className="my-4 h-px bg-slate-100" />
 
         <div>
-          <label className="block text-xs text-slate-500">
-            Premio de competencia: días sin tarifa de servicio
-          </label>
+          <label className="block text-xs text-slate-500">{labelExencion}</label>
           {vigente && (
             <p className="mt-1 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700">
               Exención vigente hasta {vigente}. Aplicar de nuevo la reemplaza

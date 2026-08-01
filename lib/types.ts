@@ -8,6 +8,10 @@ export type UserRole = "cliente" | "profesional" | "proveedor" | "admin";
 export interface PerfilCliente {
   ciudad?: string;
   fechaNacimiento?: string;
+  /** Tarifa de uso de la app personalizada (0-100). Si falta, se usa la global. */
+  tarifaClientePorcentaje?: number;
+  /** Hasta esta fecha (YYYY-MM-DD) el cliente no paga tarifa de uso. */
+  tarifaClienteExentaHasta?: string;
 }
 
 export interface PerfilProfesionalSignup {

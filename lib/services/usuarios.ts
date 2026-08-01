@@ -189,6 +189,48 @@ export function exencionVigente(u: Usuario): string | null {
   return hasta >= new Date().toISOString().slice(0, 10) ? hasta : null;
 }
 
+/* ── Tarifa de uso de la app (la paga el cliente) ─────────────────────── */
+
+/**
+ * Fija una tarifa de uso personalizada (0-100) para un cliente.
+ * Con null vuelve a usar la global de config/plataforma.
+ * Se guarda en `perfil` igual que el override del profesional, así una misma
+ * cuenta puede tener las dos cosas sin pisarse.
+ */
+export async function setTarifaClientePersonalizada(
+  uid: string,
+  pct: number | null,
+): Promise<void> {
+  await updateDoc(doc(db, COL, uid), { "perfil.tarifaClientePorcentaje": pct });
+}
+
+/** Exime al cliente de la tarifa de uso por `dias` días. Con dias <= 0 la quita. */
+export async function setExencionTarifaCliente(uid: string, dias: number): Promise<void> {
+  const ref = doc(db, COL, uid);
+  if (dias <= 0) {
+    await updateDoc(ref, { "perfil.tarifaClienteExentaHasta": null });
+    return;
+  }
+  const hasta = new Date();
+  hasta.setDate(hasta.getDate() + dias);
+  await updateDoc(ref, {
+    "perfil.tarifaClienteExentaHasta": hasta.toISOString().slice(0, 10),
+  });
+}
+
+export function tarifaClientePersonalizada(u: Usuario): number | null {
+  const pct = (u.perfil as { tarifaClientePorcentaje?: number } | undefined)
+    ?.tarifaClientePorcentaje;
+  return typeof pct === "number" ? pct : null;
+}
+
+export function exencionTarifaClienteVigente(u: Usuario): string | null {
+  const hasta = (u.perfil as { tarifaClienteExentaHasta?: string } | undefined)
+    ?.tarifaClienteExentaHasta;
+  if (!hasta) return null;
+  return hasta >= new Date().toISOString().slice(0, 10) ? hasta : null;
+}
+
 export function estaHabilitado(u: Usuario & { bloqueado?: boolean }): boolean {
   const p = u.perfil as Record<string, unknown> | undefined;
   if (u.rol === "profesional") return (p?.perfilVisible as boolean) !== false;
