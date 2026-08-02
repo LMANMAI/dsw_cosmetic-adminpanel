@@ -196,7 +196,7 @@ export function UsuariosTable({
   return (
     <div className="p-6">
       {mostrarFlag && inconsistentes > 0 && (
-        <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+        <div className="mb-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
           <strong>{inconsistentes}</strong>{" "}
           {inconsistentes === 1 ? "cuenta profesional está" : "cuentas profesionales están"} sin
           el flag <code className="rounded bg-amber-100 px-1">esProfesional</code>. No aparecen en
@@ -205,7 +205,7 @@ export function UsuariosTable({
         </div>
       )}
 
-      <div className="mb-4 flex items-center gap-2">
+      <div className="mb-4 flex items-center gap-3">
         <input
           value={q}
           onChange={(e) => {
@@ -220,30 +220,30 @@ export function UsuariosTable({
 
       <div className="overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
         <table className="w-full text-sm">
-          <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
+          <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
             <tr>
-              <th className="px-4 py-2">Nombre</th>
-              <th className="px-4 py-2">Email</th>
-              <th className="px-4 py-2">Teléfono</th>
+              <th className="px-4 py-3 font-medium">Nombre</th>
+              <th className="px-4 py-3 font-medium">Email</th>
+              <th className="px-4 py-3 font-medium">Teléfono</th>
               {extraColumns.map((c) => (
-                <th key={c.key} className="px-4 py-2">{c.label}</th>
+                <th key={c.key} className="px-4 py-3 font-medium">{c.label}</th>
               ))}
-              <th className="px-4 py-2">Estado</th>
-              {mostrarFlag && <th className="px-4 py-2">Flag</th>}
-              <th className="px-4 py-2 text-right">Acción</th>
+              <th className="px-4 py-3 font-medium">Estado</th>
+              {mostrarFlag && <th className="px-4 py-3 font-medium">Flag</th>}
+              <th className="px-4 py-3 text-right font-medium">Acción</th>
             </tr>
           </thead>
           <tbody>
             {loading && (
               <tr>
-                <td colSpan={totalCols} className="px-4 py-6 text-center text-slate-400">
+                <td colSpan={totalCols} className="px-4 py-8 text-center text-slate-400">
                   Cargando…
                 </td>
               </tr>
             )}
             {!loading && filtered.length === 0 && (
               <tr>
-                <td colSpan={totalCols} className="px-4 py-6 text-center text-slate-400">
+                <td colSpan={totalCols} className="px-4 py-8 text-center text-slate-400">
                   Sin resultados
                 </td>
               </tr>
@@ -252,16 +252,20 @@ export function UsuariosTable({
               const ok = estaHabilitado(u);
               const roto = necesitaNormalizacion(u);
               return (
-                <tr key={u.id} className="border-t border-slate-100">
-                  <td className="px-4 py-2 font-medium">{u.nombre || "—"}</td>
-                  <td className="px-4 py-2 text-slate-600">{u.email}</td>
-                  <td className="px-4 py-2 text-slate-600">{u.telefono || "—"}</td>
+                <tr key={u.id} className="border-t border-slate-100 align-middle hover:bg-slate-50/60">
+                  <td className="px-4 py-3 font-medium">{u.nombre || "—"}</td>
+                  <td className="px-4 py-3 text-slate-600">{u.email}</td>
+                  <td className="whitespace-nowrap px-4 py-3 text-slate-600">
+                    {u.telefono || "—"}
+                  </td>
                   {extraColumns.map((c) => (
-                    <td key={c.key} className="px-4 py-2 text-slate-600">
-                      {c.render(u)}
+                    <td key={c.key} className="px-4 py-3 text-slate-600">
+                      {/* Textos largos (ej. varias especialidades) se limitan a
+                          dos líneas para que la fila no se estire. */}
+                      <div className="line-clamp-2 max-w-[220px]">{c.render(u)}</div>
                     </td>
                   ))}
-                  <td className="px-4 py-2">
+                  <td className="px-4 py-3">
                     <span
                       className={
                         "inline-flex rounded-full px-2 py-0.5 text-xs " +
@@ -274,7 +278,7 @@ export function UsuariosTable({
                     </span>
                   </td>
                   {mostrarFlag && (
-                    <td className="px-4 py-2">
+                    <td className="px-4 py-3">
                       {roto ? (
                         <span
                           className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-xs text-amber-700"
@@ -287,7 +291,7 @@ export function UsuariosTable({
                       )}
                     </td>
                   )}
-                  <td className="px-4 py-2 text-right">
+                  <td className="px-4 py-3 text-right">
                     <div className="flex justify-end">
                       <ActionsMenu
                         items={[

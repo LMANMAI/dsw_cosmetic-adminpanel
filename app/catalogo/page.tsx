@@ -11,6 +11,7 @@ import {
   X,
 } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
+import { Pagination, PAGE_SIZE_DEFAULT } from "@/components/Pagination";
 import {
   actualizarCategoria,
   actualizarServicio,
@@ -140,8 +141,21 @@ function CategoriasCard({
   const [editEmoji, setEditEmoji] = useState("");
   const [trabajando, setTrabajando] = useState(false);
   const [error, setError] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState<number>(PAGE_SIZE_DEFAULT);
 
   const slugPreview = useMemo(() => slugify(nombre), [nombre]);
+
+  // Si se borran categorías y la página actual queda vacía, volvemos atrás.
+  const paginas = Math.max(1, Math.ceil(categorias.length / pageSize));
+  useEffect(() => {
+    if (page > paginas) setPage(paginas);
+  }, [page, paginas]);
+
+  const categoriasPagina = useMemo(
+    () => categorias.slice((page - 1) * pageSize, page * pageSize),
+    [categorias, page, pageSize],
+  );
 
   async function crear(e: React.FormEvent) {
     e.preventDefault();
@@ -257,7 +271,7 @@ function CategoriasCard({
             primera.
           </p>
         )}
-        {categorias.map((cat) => {
+        {categoriasPagina.map((cat) => {
           const enEdicion = editando === cat.slug;
           const cantidad = conteos[cat.slug] ?? 0;
           return (
@@ -326,6 +340,19 @@ function CategoriasCard({
         })}
       </div>
 
+      <div className="-mx-5 -mb-5 mt-3 overflow-hidden rounded-b-xl">
+        <Pagination
+          total={categorias.length}
+          page={page}
+          pageSize={pageSize}
+          onPageChange={setPage}
+          onPageSizeChange={(n) => {
+            setPageSize(n);
+            setPage(1);
+          }}
+        />
+      </div>
+
       {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
     </div>
   );
@@ -353,6 +380,9 @@ function ServiciosCard({
   const [genero, setGenero] = useState<GeneroServicio>("unisex");
 
   // Edición inline
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState<number>(PAGE_SIZE_DEFAULT);
+
   const [editando, setEditando] = useState<string | null>(null);
   const [eNombre, setENombre] = useState("");
   const [eCategoria, setECategoria] = useState("");
@@ -381,6 +411,19 @@ function ServiciosCard({
     const q = busqueda.trim().toLowerCase();
     return q ? items.filter((s) => s.nombre.toLowerCase().includes(q)) : items;
   }, [items, busqueda]);
+
+  // Cambiar filtro o búsqueda siempre vuelve a la primera página.
+  useEffect(() => setPage(1), [filtro, busqueda]);
+
+  const paginas = Math.max(1, Math.ceil((visibles?.length ?? 0) / pageSize));
+  useEffect(() => {
+    if (page > paginas) setPage(paginas);
+  }, [page, paginas]);
+
+  const serviciosPagina = useMemo(
+    () => (visibles ? visibles.slice((page - 1) * pageSize, page * pageSize) : []),
+    [visibles, page, pageSize],
+  );
 
   async function crear(e: React.FormEvent) {
     e.preventDefault();
@@ -573,7 +616,7 @@ function ServiciosCard({
         </p>
       ) : (
         <div className="divide-y divide-slate-100">
-          {visibles.map((s) => {
+          {serviciosPagina.map((s) => {
             const enEdicion = editando === s.id;
             return (
               <div
@@ -669,6 +712,21 @@ function ServiciosCard({
               </div>
             );
           })}
+        </div>
+      )}
+
+      {visibles && visibles.length > 0 && (
+        <div className="-mx-5 -mb-5 mt-3 overflow-hidden rounded-b-xl">
+          <Pagination
+            total={visibles.length}
+            page={page}
+            pageSize={pageSize}
+            onPageChange={setPage}
+            onPageSizeChange={(n) => {
+              setPageSize(n);
+              setPage(1);
+            }}
+          />
         </div>
       )}
 
