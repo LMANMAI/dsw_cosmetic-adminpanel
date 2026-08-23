@@ -15,6 +15,7 @@ import {
   COMISION_DEFAULT,
   TARIFA_CLIENTE_DEFAULT,
   MP_CLIENT_ID_DEFAULT,
+  MP_PUBLIC_KEY_DEFAULT,
   MP_COMISION_PEDIDOS_DEFAULT,
   type MpConfig,
 } from "@/lib/services/config";
@@ -125,6 +126,7 @@ function MercadoPagoCard({
   onSaved: (nuevo: MpConfig) => void;
 }) {
   const [clientId, setClientId] = useState(cfg.mpClientId);
+  const [publicKey, setPublicKey] = useState(cfg.mpPublicKey);
   const [pctPedidos, setPctPedidos] = useState<string>(
     String(cfg.mpComisionPedidosPorcentaje),
   );
@@ -133,6 +135,7 @@ function MercadoPagoCard({
 
   useEffect(() => {
     setClientId(cfg.mpClientId);
+    setPublicKey(cfg.mpPublicKey);
     setPctPedidos(String(cfg.mpComisionPedidosPorcentaje));
   }, [cfg]);
 
@@ -140,6 +143,14 @@ function MercadoPagoCard({
     const id = clientId.trim();
     if (!/^\d{6,}$/.test(id)) {
       setMsg({ ok: false, texto: "El Client ID debe ser numérico (mínimo 6 dígitos)." });
+      return;
+    }
+    const pk = publicKey.trim();
+    if (!/^(APP_USR|TEST)-\S+$/.test(pk)) {
+      setMsg({
+        ok: false,
+        texto: "La public key debe empezar con APP_USR- (producción) o TEST- (pruebas).",
+      });
       return;
     }
     const n = Number(pctPedidos);
@@ -150,7 +161,11 @@ function MercadoPagoCard({
     setGuardando(true);
     setMsg(null);
     try {
-      const nuevo = { mpClientId: id, mpComisionPedidosPorcentaje: n };
+      const nuevo = {
+        mpClientId: id,
+        mpPublicKey: pk,
+        mpComisionPedidosPorcentaje: n,
+      };
       await setMpConfig(nuevo);
       onSaved(nuevo);
       setMsg({ ok: true, texto: "Guardado. Aplica a las próximas operaciones." });
@@ -171,10 +186,11 @@ function MercadoPagoCard({
         <span className="text-xs uppercase text-slate-500">Mercado Pago</span>
       </div>
       <p className="mt-2 text-sm text-slate-500">
-        Client ID de la aplicación de Mercado Pago y tarifa de servicio que
-        retiene la plataforma sobre los pedidos de insumos (marketplace fee).
-        El client secret no se administra desde acá: está protegido en Secret
-        Manager.
+        Client ID y public key de la aplicación de Mercado Pago, y tarifa de
+        servicio que retiene la plataforma sobre los pedidos de insumos
+        (marketplace fee). El client secret y el access token NO se administran
+        desde acá: están protegidos en Secret Manager (MP_CLIENT_SECRET y
+        MP_ACCESS_TOKEN) y solo los leen las Cloud Functions.
       </p>
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <label className="block">
@@ -187,6 +203,21 @@ function MercadoPagoCard({
               setClientId(e.target.value);
             }}
             className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          />
+        </label>
+        <label className="block">
+          <span className="text-xs font-medium text-slate-600">
+            Public key
+          </span>
+          <input
+            type="text"
+            value={publicKey}
+            onChange={(e) => {
+              setMsg(null);
+              setPublicKey(e.target.value);
+            }}
+            placeholder="APP_USR-..."
+            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-mono text-xs"
           />
         </label>
         <label className="block">
@@ -239,6 +270,7 @@ export default function ComisionesPage() {
   const [tarifaClientePct, setTarifaClientePct] = useState(TARIFA_CLIENTE_DEFAULT);
   const [mpCfg, setMpCfg] = useState<MpConfig>({
     mpClientId: MP_CLIENT_ID_DEFAULT,
+    mpPublicKey: MP_PUBLIC_KEY_DEFAULT,
     mpComisionPedidosPorcentaje: MP_COMISION_PEDIDOS_DEFAULT,
   });
   const [tab, setTab] = useState<Tab>("profesionales");

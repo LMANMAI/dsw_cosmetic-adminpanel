@@ -42,12 +42,17 @@ export async function setTarifaClienteGlobal(pct: number): Promise<void> {
  */
 
 /** Valores por defecto si el doc todavía no tiene los campos. */
-export const MP_CLIENT_ID_DEFAULT = "7038717644366606";
+export const MP_CLIENT_ID_DEFAULT = "8659117657714110";
+/** Public key de la aplicación de MP. No es secreta: se puede exponer. */
+export const MP_PUBLIC_KEY_DEFAULT =
+  "APP_USR-c4656812-fec4-4c2e-9d36-e3549d7a81d4";
 export const MP_COMISION_PEDIDOS_DEFAULT = 5;
 
 export interface MpConfig {
   /** Client ID de la aplicación de Mercado Pago (no es secreto). */
   mpClientId: string;
+  /** Public key de la aplicación de Mercado Pago (no es secreta). */
+  mpPublicKey: string;
   /** Comisión (%) de la plataforma sobre pedidos de insumos (marketplace_fee). */
   mpComisionPedidosPorcentaje: number;
 }
@@ -60,6 +65,10 @@ export async function getMpConfig(): Promise<MpConfig> {
       typeof data.mpClientId === "string" && data.mpClientId
         ? data.mpClientId
         : MP_CLIENT_ID_DEFAULT,
+    mpPublicKey:
+      typeof data.mpPublicKey === "string" && data.mpPublicKey
+        ? data.mpPublicKey
+        : MP_PUBLIC_KEY_DEFAULT,
     mpComisionPedidosPorcentaje:
       typeof data.mpComisionPedidosPorcentaje === "number"
         ? data.mpComisionPedidosPorcentaje
@@ -72,6 +81,7 @@ export async function setMpConfig(cfg: MpConfig): Promise<void> {
     ref(),
     {
       mpClientId: cfg.mpClientId.trim(),
+      mpPublicKey: cfg.mpPublicKey.trim(),
       mpComisionPedidosPorcentaje: cfg.mpComisionPedidosPorcentaje,
     },
     { merge: true },

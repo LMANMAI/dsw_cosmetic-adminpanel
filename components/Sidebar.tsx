@@ -12,6 +12,7 @@ import {
   Trophy,
   Percent,
   Tags,
+  Image as ImageIcon,
   LogOut,
   Loader2,
 } from "lucide-react";
@@ -45,6 +46,7 @@ const items = [
   { href: "/clientes", label: "Clientes", icon: Users },
   { href: "/comisiones", label: "Tarifas de servicio", icon: Percent },
   { href: "/catalogo", label: "Catálogo", icon: Tags },
+  { href: "/banners", label: "Banners del home", icon: ImageIcon },
 ];
 
 export function Sidebar() {

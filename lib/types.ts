@@ -54,7 +54,8 @@ export interface Gratificacion {
 
 export interface PerfilProveedor {
   razonSocial: string;
-  cuit: string;
+  /** CUIT/CUIL. Opcional: no se valida ni se exige en el alta. */
+  cuit?: string;
   rubro: string;
   ciudad: string;
   direccion?: string;
@@ -215,6 +216,21 @@ export interface Categoria {
   slug: CategoriaSlug;
   nombre: string;
   emoji: string;
+  /** Foto de la categoría que se muestra en el home de la app. */
+  imagenUrl?: string;
+}
+
+/** Banner promocional del home del cliente (colección `banners`). */
+export interface Banner {
+  id: string;
+  titulo: string;
+  subtitulo?: string;
+  imagenUrl: string;
+  /** Categoría a la que lleva al tocarlo (opcional). */
+  categoriaSlug?: string;
+  orden: number;
+  activo: boolean;
+  creadoEn?: string;
 }
 
 export type GeneroServicio = "femenino" | "masculino" | "unisex";

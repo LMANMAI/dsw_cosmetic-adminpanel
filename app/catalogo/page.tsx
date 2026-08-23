@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Check,
   CloudUpload,
+  ImagePlus,
   Pencil,
   Plus,
   Tags,
@@ -12,6 +13,7 @@ import {
 } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { Pagination, PAGE_SIZE_DEFAULT } from "@/components/Pagination";
+import { uploadImagen } from "@/lib/services/upload";
 import {
   actualizarCategoria,
   actualizarServicio,
@@ -143,8 +145,25 @@ function CategoriasCard({
   const [error, setError] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState<number>(PAGE_SIZE_DEFAULT);
+  const [subiendo, setSubiendo] = useState<string | null>(null);
 
   const slugPreview = useMemo(() => slugify(nombre), [nombre]);
+
+  /** Sube la foto que se muestra en el home de la app para esa categoría. */
+  async function subirFoto(cat: Categoria, file: File | undefined) {
+    if (!file) return;
+    setError("");
+    setSubiendo(cat.slug);
+    try {
+      const url = await uploadImagen(file, "categorias");
+      await actualizarCategoria(cat.slug, { imagenUrl: url });
+      onCambio();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "No se pudo subir la foto.");
+    } finally {
+      setSubiendo(null);
+    }
+  }
 
   // Si se borran categorías y la página actual queda vacía, volvemos atrás.
   const paginas = Math.max(1, Math.ceil(categorias.length / pageSize));
@@ -310,12 +329,39 @@ function CategoriasCard({
                 </>
               ) : (
                 <>
-                  <span className="w-7 text-center text-lg">{cat.emoji}</span>
+                  {cat.imagenUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={cat.imagenUrl}
+                      alt=""
+                      className="h-9 w-9 rounded-lg object-cover"
+                    />
+                  ) : (
+                    <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-lg">
+                      {cat.emoji}
+                    </span>
+                  )}
                   <span className="min-w-40 font-medium">{cat.nombre}</span>
                   <code className="text-xs text-slate-400">{cat.slug}</code>
                   <span className="ml-auto text-xs text-slate-500">
                     {cantidad} servicio{cantidad === 1 ? "" : "s"}
                   </span>
+                  <label
+                    className={btnIcon + " cursor-pointer"}
+                    title={cat.imagenUrl ? "Cambiar foto del home" : "Subir foto para el home"}
+                  >
+                    {subiendo === cat.slug ? (
+                      <span className="block h-3.5 w-3.5 animate-pulse rounded-full bg-slate-300" />
+                    ) : (
+                      <ImagePlus size={14} />
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => subirFoto(cat, e.target.files?.[0])}
+                    />
+                  </label>
                   <button
                     onClick={() => empezarEdicion(cat)}
                     className={btnIcon}

@@ -44,6 +44,7 @@ export async function listCategorias(): Promise<Categoria[]> {
       slug: d.id,
       nombre: (d.data().nombre as string) ?? d.id,
       emoji: (d.data().emoji as string) ?? "",
+      imagenUrl: (d.data().imagenUrl as string) || undefined,
     }))
     .sort((a, b) => a.nombre.localeCompare(b.nombre));
 }
@@ -68,7 +69,7 @@ export async function crearCategoria(datos: {
 /** Solo nombre y emoji: el slug es el ID y cambiarlo rompería referencias. */
 export async function actualizarCategoria(
   slug: string,
-  cambios: { nombre?: string; emoji?: string },
+  cambios: { nombre?: string; emoji?: string; imagenUrl?: string },
 ): Promise<void> {
   await updateDoc(doc(db, CATEGORIAS_COL, slug), cambios);
 }
