@@ -7,3 +7,10 @@ dist
 *.tsbuildinfo
 .DS_Store
 .vercel
+.env.local.example
+
+# Service account keys de Firebase - NUNCA commitear
+claves/
+*-sa.json
+serviceAccountKey*.json
+.env.local.example

@@ -115,7 +115,7 @@ function FormNueva({ onCreada }: { onCreada: () => void }) {
             className={input}
             value={gratificacion}
             onChange={(e) => setGratificacion(e.target.value)}
-            placeholder='Ej: "$50.000" o "1 mes sin comisión"'
+            placeholder='Ej: "$50.000" o "1 mes sin tarifa de servicio"'
           />
         </div>
         <div className="flex items-end lg:col-span-2">
